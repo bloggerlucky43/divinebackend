@@ -99,11 +99,22 @@ app.get('/verify-payment', async (req, res) => {
        const message = textResponse.choices[0].message.content;
  
        
-       const imagePrompt = `Create a mystical, powerful, and uplifting image of a radiant, celestial ${formData.gender === 'female' ? 'goddess' : 'angelic being'} named ${formData.name}, 
- born on ${formData.dob}, under the sign of ${formData.sign}, currently in ${formData.location}. 
- ${formData.gender === 'female' ? 'She' : 'He'} is surrounded by shimmering cosmic energy, a glowing aura, and ethereal light. 
- Their essence embodies the energy of ${formData.desire.replace("-", " ")}, visualized as a luminous symbol held in their hands. 
- Styled as high-fantasy spiritual artwork, with sacred geometry, iridescent colors, and divine galactic vibes.`;
+       const isFemale = formData.gender === 'female';
+
+       const imagePrompt = `
+       Create a breathtaking high-fantasy portrait of a divine ${isFemale ? 'goddess' : 'celestial guardian'} named ${formData.name}, 
+       born on ${formData.dob}, under the zodiac sign of ${formData.sign}. 
+       ${isFemale ? 'She' : 'He'} radiates ${isFemale ? 'graceful yet commanding' : 'fierce and protective'} energy, surrounded by ${isFemale ? 'golden stardust and glowing sacred geometry' : 'dark ethereal flames and celestial lightning'}.
+       
+       The background shimmers with ${isFemale ? 'iridescent cosmic hues' : 'stormy galactic clouds'}, 
+       and ${isFemale ? 'her' : 'his'} aura is infused with divine energy. 
+       In ${isFemale ? 'her' : 'his'} hands, ${isFemale ? 'she' : 'he'} holds the luminous essence of ${formData.desire.replace("-", " ")}, 
+       symbolized as a radiant, floating artifact.
+       
+       The style should mirror ultra-detailed digital fantasy art, inspired by Egyptian goddesses or angelic warriors, 
+       emphasizing ${isFemale ? 'celestial beauty and spiritual elegance' : 'divine power and celestial dominance'}.
+       `;
+       
  
        const imageResponse = await openai.images.generate({
          model: "dall-e-3",
