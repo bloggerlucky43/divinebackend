@@ -39,8 +39,8 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:5000/success?session_id={{CHECKOUT_SESSION_ID}}',
-      cancel_url: 'http://localhost:5000/cancel',
+      success_url: 'https://divinemyst.onrender.com/success?session_id={{CHECKOUT_SESSION_ID}}',
+      cancel_url: 'https://divinemyst.onrender.com/cancel',
       metadata: {
         dob: formData.dob,
         name: formData.name,
