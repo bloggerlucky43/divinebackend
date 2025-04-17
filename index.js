@@ -87,7 +87,7 @@ app.get('/verify-payment', async (req, res) => {
       };
 
        // Build the OpenAI prompt
-       const prompt = `Generate a spiritual, uplifting message for a ${formData.gender} born on ${formData.dob}, name is ${formData.name} living in ${formData.location}, who desires ${formData.desire}, and is a ${formData.sign} sign. Keep it mystical, powerful, and full of positive energy.`;
+       const prompt = `Generate a spiritual, uplifting message for a ${formData.gender} born on ${formData.dob}, name is ${formData.name} living in ${formData.location}, who desires ${formData.desire}, and is a ${formData.sign} sign. Keep it mystical, powerful, and full of positive energy. Dont include [your name] at the end of the text you should replace it with ${formData.name}`;
 
        // Get text message from OpenAI
        const textResponse = await openai.chat.completions.create({
