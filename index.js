@@ -31,7 +31,6 @@ app.post('/create-checkout-session', async (req, res) => {
 
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       line_items: [
         {
           price: process.env.PRICE_ID,
@@ -48,6 +47,9 @@ app.post('/create-checkout-session', async (req, res) => {
         desire: formData.desire,
         sign: formData.sign,
         gender: formData.gender,
+      },
+      automatic_payment_methods: {
+      enabled: true
       },
     });
 
