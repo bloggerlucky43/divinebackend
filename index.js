@@ -32,7 +32,7 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}',
+      success_url: 'https://divinemyst.life/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: 'https://divinemyst.life',
       metadata: {
         dob: formData.dob,
@@ -179,6 +179,7 @@ app.get('/verify-payment', async (req, res) => {
 
       // ✅ Store the result so we don’t regenerate
       verifiedSessions.set(sessionId, { message, imageUrl });
+      console.log(verifiedSessions,"sessions that are verified")
 
       return res.json({ success: true, message, imageUrl });
     } else {
