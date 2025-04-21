@@ -20,7 +20,7 @@ const openai = new OpenAI({
 });
 
 app.post('/create-promo-code', async (req, res) => {
-  const code=req.body;
+  const {code}=req.body;
   if (!code) {
     return res.status(400).json({
       success: false,
