@@ -19,6 +19,43 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+app.post('/create-promo-code', async (req, res) => {
+  const code=req.body;
+  if (!code) {
+    return res.status(400).json({
+      success: false,
+      message: 'Promo code is required.',
+    });
+  }
+
+  try {
+    // Create a coupon (20% off, valid once)
+    const coupon = await stripe.coupons.create({
+      percent_off: 90,
+      duration: 'forever',
+    });
+
+    // Create a promo code linked to the coupon
+    const promoCode = await stripe.promotionCodes.create({
+      coupon: coupon.id,
+      code: `${code}`, 
+    });
+
+    // Send the created promo code as response
+    res.status(200).json({
+      success: true,
+      message: 'Promo code created successfully!',
+      promoCode,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
 app.post('/create-checkout-session', async (req, res) => {
   const formData = req.body;
   console.log("THE data from the frontend is", formData);
@@ -32,7 +69,7 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}',
+      success_url: 'https://divinemyst.life/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: 'https://divinemyst.life',
       allow_promotion_codes: true,
       metadata: {
@@ -45,77 +82,14 @@ app.post('/create-checkout-session', async (req, res) => {
       },
     });
 
-    console.log("Saved data with session ID:", session.id);
+    // console.log(session);
+    
     res.json({ url: session.url });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    console.error(err)
   }
 });
-
-// app.get('/verify-payment', async (req, res) => {
-//   const sessionId = req.query.session_id;
-//   console.log("The session id", sessionId);
-
-//   try {
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-//     if (session.payment_status === 'paid') {
-//       const metadata = session.metadata;
-
-//       const formData = {
-//         dob: metadata.dob,
-//         name: metadata.name,
-//         location: metadata.location,
-//         desire: metadata.desire,
-//         sign: metadata.sign,
-//         gender: metadata.gender,
-//       };
-
-//       const prompt = `Generate a spiritual, uplifting message for a ${formData.gender} born on ${formData.dob}, name is ${formData.name} living in ${formData.location}, who desires ${formData.desire}, and is a ${formData.sign} sign. Keep it mystical, powerful, and full of positive energy. Dont include [your name] at the end of the text you should replace it with ${formData.name}`;
-
-//       const textResponse = await openai.chat.completions.create({
-//         model: "gpt-3.5-turbo",
-//         messages: [{ role: "user", content: prompt }],
-//          max_tokens: 300,
-//       });
-
-//       const message = textResponse.choices[0].message.content;
-//       const isFemale = formData.gender === 'female';
-
-//       const imagePrompt = `
-//         Create a breathtaking high-fantasy portrait of a divine ${isFemale ? 'goddess' : 'celestial guardian'} named ${formData.name}, 
-//         born on ${formData.dob}, under the zodiac sign of ${formData.sign}. 
-//         ${isFemale ? 'She' : 'He'} radiates ${isFemale ? 'graceful yet commanding' : 'fierce and protective'} energy, surrounded by ${isFemale ? 'golden stardust and glowing sacred geometry' : 'dark ethereal flames and celestial lightning'}.
-        
-//         The background shimmers with ${isFemale ? 'iridescent cosmic hues' : 'stormy galactic clouds'}, 
-//         and ${isFemale ? 'her' : 'his'} aura is infused with divine energy. 
-//         In ${isFemale ? 'her' : 'his'} hands, ${isFemale ? 'she' : 'he'} holds the luminous essence of ${formData.desire.replace("-", " ")}, 
-//         symbolized as a radiant, floating artifact.
-        
-//         The style should mirror ultra-detailed digital fantasy art, inspired by Egyptian goddesses or angelic warriors, 
-//         emphasizing ${isFemale ? 'celestial beauty and spiritual elegance' : 'divine power and celestial dominance'}.
-//       `;
-
-//       const imageResponse = await openai.images.generate({
-//         model: "dall-e-3",
-//         prompt: imagePrompt,
-//         n: 1,
-//         size: "1024x1024",
-//       });
-
-//       const imageUrl = imageResponse.data[0].url;
-
-//       console.log("data from the api is", imageUrl);
-
-//       return res.json({ success: true, message, imageUrl });
-//     } else {
-//       res.json({ success: false, message: 'Payment not completed' });
-//     }
-//   } catch (error) {
-//     console.error("Error verifying payment:", error);
-//     res.status(500).json({ success: false, message: 'Internal Server Error' });
-//   }
-// });
 
 const verifiedSessions = new Map(); // key = sessionId, value = { message, imageUrl }
 
